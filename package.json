@@ -2,9 +2,9 @@
   "name": "nodetest",
   "version": "1.0.0",
   "description": "",
-  "main": "test.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node test.js"
+    "start": "node app.js"
   },
   "author": "",
   "license": "ISC",

@@ -1,11 +1,6 @@
-// style for console
-var styles = [
-    'background: gray',
-    'color: green',
-    'display: block;'
-].join(';');
+// This will create directory, subdirectory and initial files
 
-
+var botName = "EMPRESA"
 var mkdirp = require('mkdirp');
 var fs = require('fs');
 
@@ -19,7 +14,7 @@ var moduleName;
 var subDirectory;
 var mName;
 
-checkArg(firstArg, secondArg);
+start(firstArg, secondArg);
 
 var moduleController = moduleName + '.controller.js';
 var moduleModule = moduleName + '.module.js';
@@ -31,13 +26,17 @@ var fileName = [moduleController, moduleModule, moduleHtml, moduleScss];
 
 // --services company
 // check Arg
-function checkArg(firstArg, secondArg) {
+function start(firstArg, secondArg) {
+    // check either user wants to create directory or subdirectory
+    // this will execute if user wants to create subdirectory 
     if(firstArg.slice(0, 1) == '.') {
         subDirectory = firstArg.slice(1);
         mName = secondArg;
         instance = true;
         createSubDirectory(mName, subDirectory);
     } else {
+        // if user wants to create directory
+        // creating directory starts right from here
         moduleName = firstArg;
         createModuleDirectory(moduleName);
         if(secondArg) {
@@ -49,29 +48,32 @@ function checkArg(firstArg, secondArg) {
 
 // creates module directory
 function createModuleDirectory(moduleName) {
-    
+    // implement loading 
+    // try npm install progress (npmjs.com/package/progress)
+    // loading();
     mkdirp('modules/'+ moduleName, function(err) {
-        if(err) throw err;
 
-        for(var i = 0; i < fileName.length; i++) {
-            fs.writeFile('./modules/' + moduleName + '/' + fileName[i], '//code here', function(err) {
-                if(err) throw err;
-            });    
-            // To log all files uncomment below line
-            // console.log(fileName[i] + " created");
-        }
+        // error 
+        if(err) throw err;
+        
+        askToCreateInitialFiles(moduleName, '');
     });
-    console.log("app.module: " + moduleName + " module created along with " + moduleName + "\'s" + " initial files");
+    console.log('app.module: ' + moduleName + ` module created. \n\nDo you want to create initial files inside ${moduleName} directory? [yes/no]`);
 }
 
-function loading() {
-    var P = ["\\", "|", "/", "-"];
-    var x = 0;
-    return setInterval(function() {
-      process.stdout.write("\r" + P[x++]);
-      x &= 3;
-    }, 250);
-};
+// creates directory files 
+function createDirectoryFiles(moduleName) {
+    var files = 0;
+    for(var i = 0; i < fileName.length; i++) {
+        fs.writeFile('./modules/' + moduleName + '/' + fileName[i], '//code here', function(err) {
+            if(err) throw err;
+        });    
+        files = files+1;
+        // To log all files
+        // console.log(fileName[i] + " created");
+    }
+    console.log("\nadded " + files + " files in "+ moduleName +"\n");
+}
 
 // creates sub directory
 function createSubDirectory(moduleName, subDirectory) {
@@ -83,13 +85,13 @@ function createSubDirectory(moduleName, subDirectory) {
         if(!instance) {
             createSubDirectoryFiles(moduleName, subDirectory);
         } else {
-            askForSubDirectoryFiles(moduleName, subDirectory);
+            askToCreateInitialFiles(moduleName, subDirectory);
         }
         // for dynamic log
         if(!instance) {
             console.log('app.' + moduleName + ': ' + subDirectory + ' directory created!');
         } else {
-            console.log('app.' + moduleName + ': ' + subDirectory + ` directory created. \nDo you want to create initial files inside ${subDirectory} directory? [yes/no]`);            
+            console.log('app.' + moduleName + ': ' + subDirectory + ` directory created. \n\nDo you want to create initial files inside ${subDirectory} directory? [yes/no]`);            
         }
     } else {
         if(instance) {
@@ -100,25 +102,27 @@ function createSubDirectory(moduleName, subDirectory) {
     }
 }
 
+// creates sub directory files
 function createSubDirectoryFiles(moduleName, subDirectory) {
     if(subDirectory == 'services') {
         var serviceName = moduleName + '.service.js';
         fs.writeFile('./modules/' + moduleName + '/' + subDirectory + '/' + serviceName, '//code here', function(err) {
             if(err) throw err;
         });
-        console.log("app." + moduleName + ": " + serviceName + ' created');
+        console.log("\nadded 1 file in "+ moduleName + "/" + subDirectory +"\n");    
     } else {
         console.log("This directory does not contain any initial files.")
     }
 }
 
-function askForSubDirectoryFiles(moduleName, subDirectory) {
+// ask for sub directory files
+function askToCreateInitialFiles(moduleName, subDirectory) {
 
     const readline = require('readline');
     const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: 'EQUINOX> '
+    prompt: botName +'> '
     });
 
     rl.prompt();
@@ -129,19 +133,27 @@ function askForSubDirectoryFiles(moduleName, subDirectory) {
         console.log('world!');
         break;
         case 'yes':
-        createSubDirectoryFiles(moduleName, subDirectory);
+        if(!subDirectory) {
+            createDirectoryFiles(moduleName);
+        } else {
+            createSubDirectoryFiles(moduleName, subDirectory);
+        }
         rl.close();
         break;
         case 'no':
         rl.close();
         break;
         default:
-        console.log(`Do you want to create initial files inside ${subDirectory} directory? [yes/no]`);
+        if(!subDirectory) {
+            console.log(`Do you want to create initial files inside ${moduleName} directory? [yes/no]`);            
+        } else {
+            console.log(`Do you want to create initial files inside ${subDirectory} directory? [yes/no]`);
+        }
         break;
     }
     rl.prompt();
     }).on('close', () => {
-    console.log('Have a great day! #happyCoding');
+    console.log('Have a great day! #happyCoding\n');
     process.exit(0);
     });
 }
